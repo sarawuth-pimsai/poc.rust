@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # 1. NATS: Message Broker สำหรับพักข้อมูล Log
+  nats:
+    image: nats:latest
+    container_name: nats-broker
+    ports:
+      - "4222:4222" # Client port
+      - "8222:8222" # Monitoring port
+    restart: always
+
+  # 2. ClickHouse: Database สำหรับเก็บและวิเคราะห์ Log มหาศาล
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse-db
+    ports:
+      - "8123:8123" # HTTP interface
+      - "9000:9000" # Native interface
+    environment:
+      - CLICKHOUSE_DB=logging
+      - CLICKHOUSE_USER=admin
+      - CLICKHOUSE_PASSWORD=password
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    volumes:
+      - ch_data:/var/lib/clickhouse
+    restart: always
+
+  # 3. Vector: ตัวดูด Log จาก File -> ส่งเข้า NATS
+  # (ในโปรดักชัน Vector ตัวนี้จะรันอยู่บน Droplet เครื่องเดียวกับ App ของคุณ)
+  vector:
+    image: timberio/vector:latest-alpine
+    container_name: vector-agent
+    volumes:
+      - ./vector.toml:/etc/vector/vector.toml:ro
+      - ./logs:/var/log/app:ro # แมพโฟลเดอร์ Log จาก App เข้ามา
+    depends_on:
+      - nats
+    restart: always
+
+  # 4. Vector Aggregator: ตัวดึง Log จาก NATS -> ลง ClickHouse
+  # ช่วยแยกโหลดการเขียน DB ออกจากตัว App หลัก
+  vector-aggregator:
+    image: timberio/vector:latest-alpine
+    container_name: vector-aggregator
+    volumes:
+      - ./vector-aggregator.toml:/etc/vector/vector.toml:ro
+    depends_on:
+      - clickhouse
+      - nats
+    restart: always
+
+volumes:
+  ch_data:
