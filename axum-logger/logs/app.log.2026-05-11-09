@@ -1,0 +1,4 @@
+2026-05-11T09:29:01.549103Z  INFO axum_logger: Starting server on 0.0.0.0:3000
+2026-05-11T09:29:08.502783Z DEBUG request{method=GET uri=/health version=HTTP/1.1}: tower_http::trace::on_request: started processing request
+2026-05-11T09:29:08.503148Z  INFO request{method=GET uri=/health version=HTTP/1.1}: axum_logger::routes::health: Health check endpoint called tracing="12345"
+2026-05-11T09:29:08.503246Z DEBUG request{method=GET uri=/health version=HTTP/1.1}: tower_http::trace::on_response: finished processing request latency=0 ms status=200

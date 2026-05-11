@@ -1,0 +1,42 @@
+sources:
+  nats_source:
+    type: nats
+    url: "nats://nats:4222"
+    subject: "logs"
+    queue: "vector" # queue group — safe to run multiple Vector instances
+
+transforms:
+  parse_logs:
+    type: remap
+    inputs:
+      - nats_source
+    source: |
+      raw = .message
+      parsed, err = parse_json(raw)
+      if err != null {
+        log("failed to parse log: " + err, level: "warn")
+        abort
+      }
+      .timestamp  = to_string(parsed.timestamp) ?? ""
+      .level      = to_string(parsed.level) ?? "UNKNOWN"
+      .message    = to_string(parsed.fields.message) ?? ""
+      .target     = to_string(parsed.target) ?? ""
+      .raw_json   = raw
+      . = {
+        "timestamp": .timestamp,
+        "level":     .level,
+        "message":   .message,
+        "target":    .target,
+        "raw_json":  .raw_json
+      }
+
+sinks:
+  clickhouse_sink:
+    type: clickhouse
+    inputs:
+      - parse_logs
+    endpoint: "http://clickhouse:8123"
+    database: logs
+    table: app_logs
+    healthcheck:
+      enabled: true
