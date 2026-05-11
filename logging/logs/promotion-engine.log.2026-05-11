@@ -1,4 +1,0 @@
-{"timestamp":"2026-05-11T01:53:45.268978Z","level":"INFO","fields":{"message":"Promotion Engine is running","event":"system_start","mode":"production"},"target":"logging"}
-{"timestamp":"2026-05-11T01:53:45.269060Z","level":"ERROR","fields":{"message":"Failed to apply promotion","status":"fail","error_code":"PROMO_APPLY_ERROR","promo_id":"PROMO123","user_id":"user_99","latency_ms":12},"target":"logging"}
-{"timestamp":"2026-05-11T01:55:31.230366Z","level":"INFO","fields":{"message":"Promotion Engine is running","event":"system_start","mode":"production"},"target":"logging"}
-{"timestamp":"2026-05-11T01:55:31.230441Z","level":"ERROR","fields":{"message":"Failed to apply promotion","status":"fail","error_code":"PROMO_APPLY_ERROR","promo_id":"PROMO123","user_id":"user_99","latency_ms":12},"target":"logging"}
